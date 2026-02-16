@@ -1,5 +1,6 @@
 const userModel = require("../models/user.model")
 const jwt = require("jsonwebtoken")
+const emailService = require("../services/email.service")
 
 
 async function userRegisterController(req, res) {
@@ -27,6 +28,7 @@ async function userRegisterController(req, res) {
     })
     await user.save()
 
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "1d"
     })
@@ -41,6 +43,7 @@ async function userRegisterController(req, res) {
         token
     })
 
+    await emailService.sendRegistrationEmail(email, name)
 
     // res.status(201).json({
     //     message: "User registered successfully",
@@ -61,7 +64,7 @@ async function userLoginController(req, res) {
         })
     }
 
-    const user = await userModel.findOne({ email }).select("+password")
+    const user = await userModel.findOne({ email }).select("+password +name")
 
     if (!user) {
         return res.status(404).json({
@@ -92,6 +95,7 @@ async function userLoginController(req, res) {
         },
         token
     })
+    await emailService.sendLoginEmail(email, user.name)
 
 
 }
