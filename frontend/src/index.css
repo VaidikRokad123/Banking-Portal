@@ -63,8 +63,13 @@ body::before {
 }
 
 @keyframes bgShift {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(-3%, -3%); }
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(-3%, -3%);
+  }
 }
 
 /* ===== LAYOUT ===== */
@@ -115,6 +120,7 @@ body::before {
     opacity: 0;
     transform: translateY(24px) scale(0.97);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -250,9 +256,19 @@ body::before {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  75% { transform: translateX(6px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-6px);
+  }
+
+  75% {
+    transform: translateX(6px);
+  }
 }
 
 /* ===== AUTH LINK ===== */
@@ -438,7 +454,9 @@ body::before {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ===== RESPONSIVE ===== */
@@ -457,5 +475,103 @@ body::before {
 
   .dashboard-nav {
     padding: 1rem;
+  }
+}
+
+/* ===== SUCCESS MESSAGE ===== */
+.success-message {
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  color: var(--success);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* ===== SELECT ===== */
+.form-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 0.95rem;
+  transition: var(--transition);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.form-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+
+.form-select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.5rem;
+}
+
+/* ===== ACCOUNTS LIST ===== */
+.accounts-list {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.accounts-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.account-card {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  transition: var(--transition);
+}
+
+.account-card:hover {
+  border-color: var(--border-glow);
+  background: var(--bg-card-hover);
+}
+
+.account-card-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.account-card-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.account-card-item .tile-label {
+  font-size: 0.65rem;
+}
+
+.account-card-item .tile-value {
+  font-size: 0.9rem;
+}
+
+.tile-value.danger {
+  color: var(--danger);
+}
+
+@media (max-width: 640px) {
+  .account-card-row {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

@@ -26,3 +26,25 @@ export async function loginUser(email, password) {
         body: JSON.stringify({ email, password }),
     });
 }
+
+export async function createAccount(currency) {
+    const token = localStorage.getItem('token');
+    return apiRequest("/api/account", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currency }),
+    });
+}
+
+export async function getAccounts() {
+    const token = localStorage.getItem('token');
+    return apiRequest("/api/account", {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+    });
+}
