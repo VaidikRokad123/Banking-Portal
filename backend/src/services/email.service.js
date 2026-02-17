@@ -37,7 +37,7 @@ const sendEmail = async (to, subject, text, html) => {
     } catch (error) {
         console.error('Error sending email:', error);
     }
-};
+}
 
 async function sendRegistrationEmail(email, name) {
     const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
@@ -57,7 +57,17 @@ async function sendLoginEmail(email, name) {
     console.log('Login email sent successfully');
 }
 
+async function sendTransactionEmail(email, name, amount, type) {
+    const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    const subject = 'Transaction Alert - State Bank of India';
+    const text = `Hello ${name}, you performed a ${type} transaction of ${amount} on ${now}`;
+    const html = `<p>Hello <b>${name}</b>, you performed a ${type} transaction of ${amount}.</p><p>Transaction Date & Time: <b>${now}</b></p>`;
+    await sendEmail(email, subject, text, html);
+    console.log('Transaction email sent successfully');
+}
+
 module.exports = {
     sendRegistrationEmail,
     sendLoginEmail,
+    sendTransactionEmail
 }
