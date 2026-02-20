@@ -48,8 +48,35 @@ async function getAccountsController(req, res) {
     }
 }
 
+async function getBalanceController(req, res) {
+    try {
+        const account = await accountModel.findOne({
+            _id: req.params.id,
+            user: req.user._id
+        })
+        if (!account) {
+            return res.status(404).json({
+                message: "Account not found",
+                status: false
+            })
+        }
+
+        const balance = await account.getBalance()
+        res.status(200).json({
+            balance: balance,
+            status: true
+        })
+    } catch (error) {
+        console.error("Error fetching balance:", error)
+        res.status(500).json({
+            message: "Internal server error",
+            status: false
+        })
+    }
+}
 
 module.exports = {
     createAccountController,
-    getAccountsController
+    getAccountsController,
+    getBalanceController
 }

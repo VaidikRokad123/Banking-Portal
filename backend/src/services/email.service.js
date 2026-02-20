@@ -66,8 +66,18 @@ async function sendTransactionEmail(email, name, amount, type) {
     console.log('Transaction email sent successfully');
 }
 
+async function sendFailedTransactionEmail(email, name, amount, type) {
+    const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    const subject = 'Transaction Alert - State Bank of India';
+    const text = `Hello ${name}, you performed a ${type} transaction of ${amount} on ${now}`;
+    const html = `<p>Hello <b>${name}</b>, you performed a ${type} transaction of ${amount}.</p><p>Transaction Date & Time: <b>${now}</b></p>`;
+    await sendEmail(email, subject, text, html);
+    console.log('Transaction email sent successfully');
+}
+
 module.exports = {
     sendRegistrationEmail,
     sendLoginEmail,
-    sendTransactionEmail
+    sendTransactionEmail,
+    sendFailedTransactionEmail
 }

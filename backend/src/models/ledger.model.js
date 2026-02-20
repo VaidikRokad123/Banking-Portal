@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 
+
 const ledgerSchema = new mongoose.Schema({
 
     account:
@@ -19,7 +20,7 @@ const ledgerSchema = new mongoose.Schema({
 
     },
 
-    transacation:
+    transaction:
     {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Transaction",
@@ -34,8 +35,6 @@ const ledgerSchema = new mongoose.Schema({
         required: [true, "Type is required"],
         immutable: true
     }
-
-
 
 },
 
