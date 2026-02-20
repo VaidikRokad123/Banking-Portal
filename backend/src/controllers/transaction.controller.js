@@ -89,13 +89,13 @@ async function createTransactionController(req, res) {
             description: "Debit entry for transaction"
         }], { session })
 
-        const creditLedgerEntry = await ledgerModel.create({
+        const creditLedgerEntry = await ledgerModel.create([{
             account: toAcoount,
             type: "CREDIT",
             amount,
             transaction: transaction._id,
             description: "Credit entry for transaction"
-        }, { session })
+        }], { session })
 
         transaction.status = "SUCCESS"
         await transaction.save({ session })

@@ -41,17 +41,17 @@ Bank/
 │       ├── controllers/           # Route handlers
 │       │   ├── auth.controller.js
 │       │   ├── account.controller.js
-│       │   └── transacation.controller.js
+│       │   └── transaction.controller.js
 │       ├── middleware/            # Auth middleware (JWT)
 │       ├── models/               # Mongoose schemas
 │       │   ├── user.model.js
 │       │   ├── account.model.js
 │       │   ├── ledger.model.js
-│       │   └── transacation.model.js
+│       │   └── transaction.model.js
 │       ├── routes/               # API routes
 │       │   ├── auth.routes.js
 │       │   ├── account.routes.js
-│       │   └── transacation.routes.js
+│       │   └── transaction.routes.js
 │       └── services/
 │           └── email.service.js   # Email notification service
 │

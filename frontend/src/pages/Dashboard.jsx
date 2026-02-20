@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { getAccounts } from '../api'
+import { getAccounts, getBalance } from '../api'
 
 export default function Dashboard() {
     const [user, setUser] = useState(null)
     const [accounts, setAccounts] = useState([])
+    const [balances, setBalances] = useState({})
+    const [loadingBalance, setLoadingBalance] = useState({})
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -23,6 +25,19 @@ export default function Dashboard() {
             setAccounts(data.accounts || [])
         } catch (err) {
             console.error('Failed to fetch accounts:', err)
+        }
+    }
+
+    async function handleCheckBalance(accountId) {
+        setLoadingBalance(prev => ({ ...prev, [accountId]: true }))
+        try {
+            const data = await getBalance(accountId)
+            setBalances(prev => ({ ...prev, [accountId]: data.balance }))
+        } catch (err) {
+            console.error('Failed to fetch balance:', err)
+            setBalances(prev => ({ ...prev, [accountId]: 'Error' }))
+        } finally {
+            setLoadingBalance(prev => ({ ...prev, [accountId]: false }))
         }
     }
 
@@ -60,7 +75,7 @@ export default function Dashboard() {
                                 <div className="account-card-row">
                                     <div className="account-card-item">
                                         <span className="tile-label">Account No.</span>
-                                        <span className="tile-value accent">{acc._id?.slice(-10).toUpperCase()}</span>
+                                        <span className="tile-value accent account-id">{acc._id}</span>
                                     </div>
                                     <div className="account-card-item">
                                         <span className="tile-label">Currency</span>
@@ -78,6 +93,30 @@ export default function Dashboard() {
                                             {new Date(acc.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                         </span>
                                     </div>
+                                </div>
+                                <div className="account-card-footer">
+                                    <button
+                                        className="btn-balance"
+                                        onClick={() => handleCheckBalance(acc._id)}
+                                        disabled={loadingBalance[acc._id]}
+                                    >
+                                        {loadingBalance[acc._id] ? (
+                                            <><span className="spinner-sm"></span> Checking...</>
+                                        ) : (
+                                            <>💰 Check Balance</>
+                                        )}
+                                    </button>
+                                    {balances[acc._id] !== undefined && (
+                                        <div className="balance-display">
+                                            <span className="balance-label">Balance</span>
+                                            <span className="balance-value">
+                                                {balances[acc._id] === 'Error'
+                                                    ? '⚠️ Failed to load'
+                                                    : `${currencySymbol[acc.currency] || ''}${Number(balances[acc._id]).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                                                }
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}

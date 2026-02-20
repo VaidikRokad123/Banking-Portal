@@ -61,3 +61,13 @@ export async function createTransaction(fromAcoount, toAcoount, amount) {
         body: JSON.stringify({ fromAcoount, toAcoount, amount: Number(amount), idempotencyKey }),
     });
 }
+
+export async function getBalance(accountId) {
+    const token = localStorage.getItem('token');
+    return apiRequest(`/api/account/balance/${accountId}`, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+    });
+}
