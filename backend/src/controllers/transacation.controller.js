@@ -111,14 +111,6 @@ async function createTransactionController(req, res) {
         emailService.sendTransactionEmail(fromUserAccount.email, fromUserAccount.name, amount, "debit")
         emailService.sendTransactionEmail(toUserAccount.email, toUserAccount.name, amount, "credit")
 
-
-
-
-
-
-
-
-
     }
     catch (error) {
         console.error("Error creating transaction:", error)

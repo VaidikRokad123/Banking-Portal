@@ -27,7 +27,7 @@ export default function CreateAccount() {
     }
 
     return (
-        <div className="auth-page">
+        <div className="page-content">
             <div className="auth-card">
                 <div className="auth-logo">
                     <div className="logo-icon">🏦</div>

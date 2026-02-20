@@ -3,6 +3,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import CreateAccount from './pages/CreateAccount'
+import TransferMoney from './pages/TransferMoney'
+import Layout from './components/Layout'
 
 function App() {
     return (
@@ -12,8 +14,9 @@ function App() {
                     <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/create-account" element={<CreateAccount />} />
+                    <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+                    <Route path="/create-account" element={<Layout><CreateAccount /></Layout>} />
+                    <Route path="/transfer" element={<Layout><TransferMoney /></Layout>} />
                 </Routes>
             </div>
         </BrowserRouter>
