@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { getAccounts, getBalance } from '../api'
+import { getAccounts, getBalance, getTransactions, createInitialFunds } from '../api'
 
 export default function Dashboard() {
     const [user, setUser] = useState(null)
     const [accounts, setAccounts] = useState([])
     const [balances, setBalances] = useState({})
     const [loadingBalance, setLoadingBalance] = useState({})
+    const [transactions, setTransactions] = useState([])
+    const [loadingTransactions, setLoadingTransactions] = useState(false)
+    const [fundingAccount, setFundingAccount] = useState(null)
+    const [fundAmount, setFundAmount] = useState('1000')
+    const [fundingLoading, setFundingLoading] = useState(false)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -17,6 +22,7 @@ export default function Dashboard() {
         }
         setUser(JSON.parse(stored))
         fetchAccounts()
+        fetchTransactions()
     }, [navigate])
 
     async function fetchAccounts() {
@@ -25,6 +31,34 @@ export default function Dashboard() {
             setAccounts(data.accounts || [])
         } catch (err) {
             console.error('Failed to fetch accounts:', err)
+        }
+    }
+
+    async function fetchTransactions() {
+        setLoadingTransactions(true)
+        try {
+            const data = await getTransactions()
+            setTransactions(data.transactions || [])
+        } catch (err) {
+            console.error('Failed to fetch transactions:', err)
+        } finally {
+            setLoadingTransactions(false)
+        }
+    }
+
+    async function handleAddInitialFunds() {
+        if (!fundingAccount) return
+        setFundingLoading(true)
+        try {
+            await createInitialFunds(fundingAccount, fundAmount)
+            alert('Initial funds added successfully!')
+            setFundingAccount(null)
+            fetchAccounts()
+            fetchTransactions()
+        } catch (err) {
+            alert(err.message)
+        } finally {
+            setFundingLoading(false)
         }
     }
 
@@ -49,8 +83,8 @@ export default function Dashboard() {
         <div className="dashboard-content">
             <div className="welcome-card">
                 <div className="welcome-avatar">👤</div>
-                <h2>Welcome, <span>{user.name}</span></h2>
-                <p>You are now logged in to your State Bank of India account.</p>
+                <h2>Welcome, <span>{user.name}</span> {user.systemUser && <span className="system-badge">System Admin</span>}</h2>
+                <p>You are now logged in to your State Bank of SBI account.</p>
 
                 <div className="account-info">
                     <div className="info-tile">
@@ -117,11 +151,70 @@ export default function Dashboard() {
                                             </span>
                                         </div>
                                     )}
+                                    {user.systemUser && (
+                                        <button
+                                            className="btn-funds"
+                                            onClick={() => setFundingAccount(acc._id)}
+                                        >
+                                            ➕ Add Funds
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
                     </div>
                 )}
+
+                {fundingAccount && (
+                    <div className="funding-modal-overlay">
+                        <div className="funding-modal">
+                            <h3>Add Initial Funds</h3>
+                            <p>Target Account: {fundingAccount}</p>
+                            <input
+                                type="number"
+                                value={fundAmount}
+                                onChange={(e) => setFundAmount(e.target.value)}
+                                placeholder="Amount"
+                            />
+                            <div className="modal-actions">
+                                <button onClick={() => setFundingAccount(null)} className="btn-cancel">Cancel</button>
+                                <button onClick={handleAddInitialFunds} disabled={fundingLoading} className="btn-confirm">
+                                    {fundingLoading ? 'Adding...' : 'Confirm'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="transactions-section">
+                    <h3>Recent Transactions</h3>
+                    {loadingTransactions ? (
+                        <p>Loading transactions...</p>
+                    ) : transactions.length > 0 ? (
+                        <div className="transactions-list">
+                            {transactions.map(tx => {
+                                const isDebit = tx.fromAcoount?._id === accounts.find(a => a._id === tx.fromAcoount?._id)?._id;
+                                return (
+                                    <div className="transaction-item" key={tx._id}>
+                                        <div className="tx-info">
+                                            <span className="tx-type">{isDebit ? '📤 Sent to' : '📥 Received from'}</span>
+                                            <span className="tx-account">
+                                                {isDebit ? tx.toAcoount?._id : tx.fromAcoount?._id}
+                                            </span>
+                                            <span className="tx-date">{new Date(tx.createdAt).toLocaleString()}</span>
+                                        </div>
+                                        <div className={`tx-amount ${isDebit ? 'debit' : 'credit'}`}>
+                                            {isDebit ? '-' : '+'}{currencySymbol[tx.fromAcoount?.currency || 'INR']} {tx.amount.toLocaleString()}
+                                        </div>
+                                        <div className={`tx-status ${tx.status.toLowerCase()}`}>{tx.status}</div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    ) : (
+                        <p className="no-tx">No transactions found.</p>
+                    )}
+                </div>
 
                 <div className="dashboard-actions">
                     <Link to="/create-account" className="btn btn-primary">

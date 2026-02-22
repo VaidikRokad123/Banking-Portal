@@ -1,9 +1,15 @@
 import { useNavigate } from 'react-router-dom'
+import { logoutUser } from '../api'
 
 export default function Layout({ children }) {
     const navigate = useNavigate()
 
-    function handleLogout() {
+    async function handleLogout() {
+        try {
+            await logoutUser()
+        } catch (err) {
+            console.error('Logout failed:', err)
+        }
         localStorage.removeItem('token')
         localStorage.removeItem('user')
         navigate('/login')

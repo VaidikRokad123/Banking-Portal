@@ -11,4 +11,6 @@ router.post("/", authMiddleware.authMiddleware, (req, res) => {
     return transactionController.createTransactionController(req, res)
 })
 
+router.get("/", authMiddleware.authMiddleware, transactionController.getTransactionsController)
+
 module.exports = router

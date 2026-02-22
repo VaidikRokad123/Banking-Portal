@@ -71,3 +71,32 @@ export async function getBalance(accountId) {
         },
     });
 }
+
+export async function getTransactions() {
+    const token = localStorage.getItem('token');
+    return apiRequest("/api/transaction", {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+    });
+}
+
+export async function createInitialFunds(toAcoount, amount) {
+    const token = localStorage.getItem('token');
+    const idempotencyKey = crypto.randomUUID();
+    return apiRequest("/api/transaction", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ toAcoount, amount: Number(amount), idempotencyKey }),
+    });
+}
+
+export async function logoutUser() {
+    return apiRequest("/api/auth/logout", {
+        method: "POST",
+    });
+}

@@ -763,3 +763,228 @@ body::before {
   color: var(--accent);
   font-weight: 600;
 }
+
+/* ===== SYSTEM BADGE ===== */
+.system-badge {
+  font-size: 0.65rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba(14, 165, 233, 0.15);
+  border: 1px solid var(--accent);
+  border-radius: 100px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-left: 0.75rem;
+  vertical-align: middle;
+  font-weight: 600;
+}
+
+/* ===== TRANSACTIONS SECTION ===== */
+.transactions-section {
+  margin-top: 3rem;
+  text-align: left;
+  border-top: 1px solid var(--border-color);
+  padding-top: 2rem;
+}
+
+.transactions-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.transaction-item {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: var(--transition);
+}
+
+.transaction-item:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-glow);
+}
+
+.tx-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.tx-type {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.tx-account {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.tx-date {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.tx-amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.tx-amount.debit {
+  color: var(--danger);
+}
+
+.tx-amount.credit {
+  color: var(--success);
+}
+
+.tx-status {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.tx-status.success {
+  background: rgba(52, 211, 153, 0.1);
+  color: var(--success);
+}
+
+.tx-status.pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.tx-status.failed {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--danger);
+}
+
+.no-tx {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 2rem;
+}
+
+/* ===== FUNDING MODAL ===== */
+.btn-funds {
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  color: var(--success);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.btn-funds:hover {
+  background: rgba(52, 211, 153, 0.2);
+  transform: translateY(-1px);
+}
+
+.funding-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.funding-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow-glow);
+  text-align: left;
+}
+
+.funding-modal h3 {
+  margin-bottom: 0.5rem;
+}
+
+.funding-modal p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  word-break: break-all;
+}
+
+.funding-modal input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  outline: none;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-cancel {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-confirm {
+  flex: 1;
+  background: var(--accent-gradient);
+  color: var(--bg-primary);
+  border: none;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

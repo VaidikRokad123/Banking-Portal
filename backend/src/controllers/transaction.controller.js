@@ -242,7 +242,34 @@ async function createSystemUserTransactionController(req, res) {
 
 }
 
+
+async function getTransactionsController(req, res) {
+    try {
+        const userAccounts = await accountModel.find({ user: req.user._id })
+        const accountIds = userAccounts.map(acc => acc._id)
+
+        const transactions = await transactionModel.find({
+            $or: [
+                { fromAcoount: { $in: accountIds } },
+                { toAcoount: { $in: accountIds } }
+            ]
+        }).sort({ createdAt: -1 }).populate("fromAcoount toAcoount")
+
+        res.status(200).json({
+            transactions,
+            status: true
+        })
+    } catch (error) {
+        console.error("Error fetching transactions:", error)
+        res.status(500).json({
+            message: "Internal server error",
+            status: false
+        })
+    }
+}
+
 module.exports = {
     createTransactionController,
-    createSystemUserTransactionController
+    createSystemUserTransactionController,
+    getTransactionsController
 }
