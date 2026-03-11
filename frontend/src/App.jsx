@@ -4,6 +4,8 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import CreateAccount from './pages/CreateAccount'
 import TransferMoney from './pages/TransferMoney'
+import TransactionHistory from './pages/TransactionHistory'
+import Reports from './pages/Reports'
 import Layout from './components/Layout'
 
 function App() {
@@ -17,6 +19,8 @@ function App() {
                     <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
                     <Route path="/create-account" element={<Layout><CreateAccount /></Layout>} />
                     <Route path="/transfer" element={<Layout><TransferMoney /></Layout>} />
+                    <Route path="/history" element={<Layout><TransactionHistory /></Layout>} />
+                    <Route path="/reports" element={<Layout><Reports /></Layout>} />
                 </Routes>
             </div>
         </BrowserRouter>
@@ -24,3 +28,4 @@ function App() {
 }
 
 export default App
+

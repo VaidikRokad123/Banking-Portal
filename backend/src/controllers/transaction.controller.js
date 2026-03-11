@@ -268,8 +268,235 @@ async function getTransactionsController(req, res) {
     }
 }
 
+
+async function getTransactionHistoryController(req, res) {
+    try {
+        const {
+            page = 1,
+            limit = 10,
+            fromDate,
+            toDate,
+            type,
+            status,
+            accountId
+        } = req.query
+
+        const userAccounts = await accountModel.find({ user: req.user._id })
+        const accountIds = userAccounts.map(acc => acc._id)
+
+        if (accountIds.length === 0) {
+            return res.status(200).json({
+                transactions: [],
+                total: 0,
+                page: 1,
+                totalPages: 0,
+                status: true
+            })
+        }
+
+        // Build base filter — transactions involving user's accounts
+        const filter = {
+            $or: [
+                { fromAcoount: { $in: accountIds } },
+                { toAcoount: { $in: accountIds } }
+            ]
+        }
+
+        // Date range filter
+        if (fromDate || toDate) {
+            filter.createdAt = {}
+            if (fromDate) filter.createdAt.$gte = new Date(fromDate)
+            if (toDate) {
+                const end = new Date(toDate)
+                end.setHours(23, 59, 59, 999)
+                filter.createdAt.$lte = end
+            }
+        }
+
+        // Status filter
+        if (status && ["PENDING", "SUCCESS", "FAILED", "REVERSED"].includes(status)) {
+            filter.status = status
+        }
+
+        // Account filter
+        if (accountId) {
+            const accObjId = new mongoose.Types.ObjectId(accountId)
+            filter.$or = [
+                { fromAcoount: accObjId },
+                { toAcoount: accObjId }
+            ]
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit)
+
+        let transactions = await transactionModel.find(filter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(parseInt(limit))
+            .populate("fromAcoount toAcoount")
+
+        const total = await transactionModel.countDocuments(filter)
+
+        // If filtering by type (CREDIT/DEBIT), we determine direction relative to the user's accounts
+        if (type && ["CREDIT", "DEBIT"].includes(type)) {
+            const accountIdStrings = accountIds.map(id => id.toString())
+            transactions = transactions.filter(tx => {
+                const isDebit = accountIdStrings.includes(tx.fromAcoount?._id?.toString())
+                if (type === "DEBIT") return isDebit
+                if (type === "CREDIT") return !isDebit
+                return true
+            })
+        }
+
+        res.status(200).json({
+            transactions,
+            total,
+            page: parseInt(page),
+            totalPages: Math.ceil(total / parseInt(limit)),
+            status: true
+        })
+    } catch (error) {
+        console.error("Error fetching transaction history:", error)
+        res.status(500).json({
+            message: "Internal server error",
+            status: false
+        })
+    }
+}
+
+
+async function getTransactionReportController(req, res) {
+    try {
+        const { fromDate, toDate } = req.query
+
+        const userAccounts = await accountModel.find({ user: req.user._id })
+        const accountIds = userAccounts.map(acc => acc._id)
+
+        if (accountIds.length === 0) {
+            return res.status(200).json({
+                summary: { totalCredits: 0, totalDebits: 0, netFlow: 0, totalTransactions: 0 },
+                byStatus: {},
+                monthlyBreakdown: [],
+                status: true
+            })
+        }
+
+        // Date filter for ledger and transactions
+        const dateFilter = {}
+        if (fromDate) dateFilter.$gte = new Date(fromDate)
+        if (toDate) {
+            const end = new Date(toDate)
+            end.setHours(23, 59, 59, 999)
+            dateFilter.$lte = end
+        }
+
+        // --- Summary from ledger ---
+        const ledgerMatch = { account: { $in: accountIds } }
+        if (Object.keys(dateFilter).length > 0) {
+            ledgerMatch.createdAt = dateFilter
+        }
+
+        const summaryAgg = await ledgerModel.aggregate([
+            { $match: ledgerMatch },
+            {
+                $group: {
+                    _id: null,
+                    totalCredits: {
+                        $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] }
+                    },
+                    totalDebits: {
+                        $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] }
+                    },
+                    totalTransactions: { $sum: 1 }
+                }
+            }
+        ])
+
+        const summary = summaryAgg.length > 0
+            ? {
+                totalCredits: summaryAgg[0].totalCredits,
+                totalDebits: summaryAgg[0].totalDebits,
+                netFlow: summaryAgg[0].totalCredits - summaryAgg[0].totalDebits,
+                totalTransactions: summaryAgg[0].totalTransactions
+            }
+            : { totalCredits: 0, totalDebits: 0, netFlow: 0, totalTransactions: 0 }
+
+        // --- Status breakdown from transactions ---
+        const txMatch = {
+            $or: [
+                { fromAcoount: { $in: accountIds } },
+                { toAcoount: { $in: accountIds } }
+            ]
+        }
+        if (Object.keys(dateFilter).length > 0) {
+            txMatch.createdAt = dateFilter
+        }
+
+        const statusAgg = await transactionModel.aggregate([
+            { $match: txMatch },
+            {
+                $group: {
+                    _id: "$status",
+                    count: { $sum: 1 }
+                }
+            }
+        ])
+
+        const byStatus = {}
+        statusAgg.forEach(s => { byStatus[s._id] = s.count })
+
+        // --- Monthly breakdown from ledger ---
+        const monthlyAgg = await ledgerModel.aggregate([
+            { $match: ledgerMatch },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                        month: { $month: "$createdAt" }
+                    },
+                    credits: {
+                        $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] }
+                    },
+                    debits: {
+                        $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] }
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ])
+
+        const monthNames = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        const monthlyBreakdown = monthlyAgg.map(m => ({
+            label: `${monthNames[m._id.month]} ${m._id.year}`,
+            year: m._id.year,
+            month: m._id.month,
+            credits: m.credits,
+            debits: m.debits,
+            net: m.credits - m.debits,
+            count: m.count
+        }))
+
+        res.status(200).json({
+            summary,
+            byStatus,
+            monthlyBreakdown,
+            status: true
+        })
+    } catch (error) {
+        console.error("Error generating report:", error)
+        res.status(500).json({
+            message: "Internal server error",
+            status: false
+        })
+    }
+}
+
+
 module.exports = {
     createTransactionController,
     createSystemUserTransactionController,
-    getTransactionsController
+    getTransactionsController,
+    getTransactionHistoryController,
+    getTransactionReportController
 }

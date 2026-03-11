@@ -95,6 +95,34 @@ export async function createInitialFunds(toAcoount, amount) {
     });
 }
 
+export async function getTransactionHistory(params = {}) {
+    const token = localStorage.getItem('token');
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined && val !== '' && val !== null) query.append(key, val);
+    });
+    return apiRequest(`/api/transaction/history?${query.toString()}`, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+    });
+}
+
+export async function getTransactionReport(params = {}) {
+    const token = localStorage.getItem('token');
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined && val !== '' && val !== null) query.append(key, val);
+    });
+    return apiRequest(`/api/transaction/report?${query.toString()}`, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+    });
+}
+
 export async function logoutUser() {
     return apiRequest("/api/auth/logout", {
         method: "POST",
